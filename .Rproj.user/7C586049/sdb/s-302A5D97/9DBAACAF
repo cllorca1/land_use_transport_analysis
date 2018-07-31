@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "scenario_name = \"5e_full\"\nsubpath =  \"5e\"\n\nsource(\"c:/code/matsimScaling/siloAnalysis/readZonesAndRegions.R\")\nsource(\"silo/results_reader.R\")\nsource(\"silo/analyze_sp.R\")\nsource(\"silo/spatial_reader.R\")\n\n\n\noutput_path = \"c:/projects/SILO/relocation/scenarios/\"\nread_results(output_path, subpath, scenario_name)\nanalyze_sp(output_path, subpath, scenario_name)\n\noutput_path = \"c:/projects/SILO/relocation/scenarios/regional/\"\nregions = c(\"München-Landeshauptstadt\",\"Augsburg\",\"Eichstätt\",\"Dachau\")\nread_spatial(output_path, subpath, scenario_name, regions)\n\n\n",
+    "created" : 1532594433924.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1851502929",
+    "id" : "9DBAACAF",
+    "lastKnownWriteTime" : 1533019427,
+    "last_content_update" : 1533019427299,
+    "path" : "C:/code/silo_output_analyzer/main.R",
+    "project_path" : "main.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
