@@ -1,8 +1,13 @@
 pacman::p_load(ggplot2, dplyr)
 
-read_results = function(output_path, subpath, scenario_name){
+read_results = function(output_path, subpath, scenario_name, scaled){
 
-path = "c:/models/silo/muc/scenOutput"
+  if(scaled){
+    path = "c:/models/silo/mucSmall/scenOutput"
+  } else {
+    path = "c:/models/silo/muc/scenOutput"
+  }
+
 
 file_name = "resultFile1.csv"
 
@@ -39,10 +44,11 @@ while (i <= length(raw)){
 
 
 
-ggplot(data, aes(x=year, y =time, color = as.factor(region))) +
+ggplot(data %>% filter(region == 200), aes(x=year, y =time, color = as.factor(region))) +
   geom_line() + geom_point() + theme_light() + 
   xlab("Year") + ylab("Average comuting time by region (minutes)") + 
-  ylim(min_y, max_y)
+  ylim(min_y, max_y) + 
+  theme(legend.position = "none")
  
 data_mean = data %>% group_by(year) %>% summarize(time = mean(time, na.rm = T))
 

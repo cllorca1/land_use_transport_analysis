@@ -1,25 +1,37 @@
 pacman::p_load(data.table, dplyr, ggplot2)
 
-analyze_sp = function(output_path, subpath, scenario_name){
-path = "C:/models/silo/muc/microData/"
+analyze_sp = function(output_path, subpath, scenario_name,scaled, replacementFinalYear){
 
-
+  if(scaled){
+    if(replacementFinalYear){
+      path11 = "C:/models/silo/mucSmall/microData/replace/"
+    } else{
+      path11 = "C:/models/silo/mucSmall/microData/"
+    }
+    path50 = "C:/models/silo/mucSmall/microData/"
+  } else {
+    if(replacementFinalYear){
+      path11 = "C:/models/silo/muc/microData/replace/"
+    } else {
+      path11 = "C:/models/silo/muc/microData/"
+    }
+    path50 = "C:/models/silo/muc/microData/"
+}
 #read 2011 files
-pp11 = fread(paste(path,"pp_2011.csv",sep = ""))
-jj11 = fread(paste(path,"jj_2011.csv", sep = ""))
+pp11 = fread(paste(path11,"pp_2011.csv",sep = ""), fill = T)
+jj11 = fread(paste(path11,"jj_2011.csv", sep = ""), fill = T)
 
 #read 2050 files
-pp50 = fread(paste(path,"futureYears/pp_2050.csv", sep = ""))
-jj50 = fread(paste(path,"futureYears/jj_2050.csv", sep = ""))
-hh50 = fread(paste(path,"futureYears/hh_2050.csv", sep = ""))
+pp50 = fread(paste(path50,"futureYears/pp_2050.csv", sep = ""), fill = T)
+jj50 = fread(paste(path50,"futureYears/jj_2050.csv", sep = ""), fill = T)
+hh50 = fread(paste(path50,"futureYears/hh_2050.csv", sep = ""), fill = T)
 
 
 #populationByCounty ----- 
 
 
 pp11 = merge(pp11, zonesWithRegionName, by.x = "homeZone", by.y = "zone")
-aux = hh50 %>% select(id, homeZone = zone)
-aux = merge(pp50, aux, by.x = "hhID", by.y = "id")
+aux = pp50 %>% select(id, homeZone)
 aux = merge(aux, zonesWithRegionName, by.x = "homeZone", by.y = "zone")
 
 summary11 = pp11 %>% group_by(region = work_region_name) %>% summarize(count = n())
@@ -70,16 +82,16 @@ workersjj50 = merge(x = pp50, jj50, by.x = "workplace", by.y = "id")
 workersjj50$workZone = workersjj50$zone
 
 #merge pp and hh
-workersjjhh50 = merge(x = workersjj50, y = hh50, by.x = "hhID", by.y = "id")
+workersjjhh50 = merge(x = workersjj50, y = hh50, by.x = "hhid", by.y = "id")
 
 #store homeZone in the right place
 workersjjhh50$homeZone = workersjjhh50$zone.y
 
 #check if there is only one worker or more than one in the hh
-workersByhh50 = workersjjhh50 %>% group_by(hhID) %>% summarize (hhworkers = n())
+workersByhh50 = workersjjhh50 %>% group_by(hhid) %>% summarize (hhworkers = n())
 
 #and assign this value to the ppjj11 table
-workersjjhh50 = merge(workersjjhh50, workersByhh50, by="hhID")
+workersjjhh50 = merge(workersjjhh50, workersByhh50, by="hhid")
 
 
 #select the useful columns only
