@@ -1,5 +1,5 @@
-scenario_name = "base"
-subpath =  "base"
+scenario_name = "zero"
+subpath =  "zero"
 scaled = F
 
 source("c:/code/matsimScaling/siloAnalysis/readZonesAndRegions.R")

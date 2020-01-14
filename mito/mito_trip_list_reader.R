@@ -25,7 +25,7 @@ for (year in years){
 
 #add the base year trip list###############################
 #check that this file is still there and it is the trip list of 2011
-file_2011 = "c:/models/mito/muc/mitoMunich/scenOutput/base/2011/microData/trips.csv"
+file_2011 = "c:/models/silo/muc/scenOutput/mito_base/2012/microData/trips.csv"
 dataThisYear = fread(file_2011)
 summary = dataThisYear %>% group_by(purpose, mode) %>% summarize(count = n(),
                                                                  distance = mean(distance),
