@@ -1,5 +1,7 @@
 calculateSwitchToAutonomousVehicleProbabilities = function(income, year, intercept, betaRatio, betaIncome) {
   
+  #### incompatible with dashboard R file and preserved just for comparison of the ratio curve
+  
   if (year < 2020){
     ratio = 10.0 #/high ratio to avoid the probability of switching to autonomous before 2020
   } else if (year < 2022){

@@ -20,10 +20,7 @@ betaRatio = -3.5
 betaIncome = 0.00035
 
 
-source("function.R")
-
-
-
+source("function2.R")
 
 ui = dashboardPage(
   dashboardHeader(title = "AV"),
@@ -34,7 +31,9 @@ ui = dashboardPage(
     sliderInput(inputId = "year", "Year", value = 2011, min = 2011, max = 2050),
     numericInput(inputId = "minIncome", "min. income:", value = 1000),
     numericInput(inputId = "maxIncome", "max. income:", value = 120000),
-    sliderInput(inputId = "numPoints", "Number of points", value = 100, min = 10, max = 1000)
+    sliderInput(inputId = "numPoints", "Number of points", value = 100, min = 10, max = 1000),
+    numericInput(inputId = "baseYear","Year of the first AV", value = 2025),
+    numericInput(inputId = "equalPriceYear","Year when AV and CV cost the same", value = 2050)
   ),
   dashboardBody(
     tabBox(
@@ -64,7 +63,9 @@ server = function(input, output){
                                                                    input$year, 
                                                                    input$intercept,
                                                                    input$betaRatio,
-                                                                   input$betaIncome)
+                                                                   input$betaIncome,
+                                                                   input$baseYear,
+                                                                   input$equalPriceYear)
       
       this_row = list(income = this_income, probability = this_value)
             
@@ -72,7 +73,7 @@ server = function(input, output){
       
     }
     
-    p = ggplot(df, aes(x=income, y=probability)) + geom_path() + geom_point()
+    p = ggplot(df, aes(x=income, y=probability)) + geom_path() + geom_point() + ylim(0,1)
     
     ggplotly(p, height = 800)
     
@@ -90,7 +91,9 @@ server = function(input, output){
                                                                    year, 
                                                                    0,
                                                                    1,
-                                                                   0)
+                                                                   0,
+                                                                   input$baseYear,
+                                                                   input$equalPriceYear)
       
       
       
@@ -100,7 +103,7 @@ server = function(input, output){
       
     }
     
-    p = ggplot(df, aes(x=year, y=ratio)) + geom_path() + geom_point()
+    p = ggplot(df, aes(x=year, y=ratio)) + geom_path() + geom_point() + ylim(0,10)
     
     ggplotly(p, height = 800)
     

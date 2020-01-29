@@ -3,7 +3,7 @@ pacman::p_load(readr, dplyr, data.table, ggplot2, tidyr)
 
 upper_folder = "c:/models/silo/muc/scenOutput/"
 
-scenario = "baseAV2_nt"
+scenario = "baseAV4"
 
 ##read silo results
 
@@ -19,6 +19,17 @@ ggplot(av_ownership2 %>% filter(variable == "autos" | variable == "avs" | variab
 ggplot(av_ownership, aes(x= year, y = autos/hhs)) + 
   geom_line(size  =1) + geom_point(size = 2)
 
+
+#global car ownership (includes AV)
+
+
+car_ownership = read_csv(paste(upper_folder, scenario, "/siloResults/carOwnership.csv", sep  = ""))
+
+car_ownership = car_ownership %>% group_by(year) %>% mutate(total = sum(households))
+
+
+ggplot(car_ownership, aes(x=year, y= households, group = carOwnershipLevel, fill = as.factor(carOwnershipLevel))) +
+  geom_area(position = "fill")
 
 
 
@@ -55,3 +66,33 @@ ggplot(modal_share, aes(x=year, y = share, fill = mode)) +
   geom_bar(position = "fill", stat = "identity") + 
   scale_fill_manual(values = color_modes) +
   facet_wrap(.~purpose)
+
+
+
+
+#read micro data and compute summaries
+
+years = c(2011, 2020, 2030, 2040, 2050)
+
+distance = data.frame()
+
+for (year in years){
+  this_year_data = read_csv(paste(upper_folder, scenario, "/", year, "/microData/trips.csv", sep = ""))
+  this_year_data = this_year_data %>% group_by(mode) %>% summarize(count = n(), distance = sum(distance))
+  this_year_data$year = year
+  distance = distance %>% bind_rows(this_year_data)
+  rm(this_year_data)
+}
+
+
+distance$mode = factor(distance$mode, levels = modes_ordered)
+
+
+ggplot(distance, aes(x=year, y = distance, fill = mode)) + 
+  geom_bar(position = "stack", stat = "identity") + 
+  scale_fill_manual(values = color_modes)
+
+ggplot(distance, aes(x=year, y = distance/count, color = mode)) + 
+  geom_line(size = 2) + geom_point(size = 4) + 
+  scale_color_manual(values = color_modes)
+
