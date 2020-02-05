@@ -9,7 +9,7 @@ years = c(2011, 2020, 2030, 2040, 2050)
 
 summary = data.frame()
 
-scenarios = c("0_t", "A", "B", "C", "D", "E")
+scenarios = c("0_t", "0", "A", "A_t", "C", "C_t")
 
 for (scenario in scenarios){
 
@@ -55,7 +55,7 @@ ggplot(summary3, aes(x= year, y = value, color = variable)) + geom_line(size =1)
 
 color_hh_types = c("indianRed1", "indianRed4", "royalblue3")
 
-ggplot(summary3 %>% filter(scenario == "0_t" | scenario == "A"), aes(x= year, y = value, color = variable)) +
+ggplot(summary3, aes(x= year, y = value, color = variable)) +
   geom_line(size =1) + geom_point(size = 2) + facet_wrap(.~scenario) + scale_color_manual(values = color_hh_types) + 
   ylab("average commute time")
 

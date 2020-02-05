@@ -5,7 +5,7 @@ upper_folder = "c:/models/silo/muc/scenOutput/"
 
 years = c(2011, 2020, 2030, 2040, 2050)
 
-scenarios = c("0", "E", "D", "C", "B", "A")
+scenarios = c("0_no_parking", "E_no_parking", "D_no_parking", "C_no_parking", "B_no_parking", "A_no_parking")
 
 ##read silo results
 
@@ -85,7 +85,7 @@ ggplot(vkt %>% filter(mode != "pt"), aes(x = year, y= vkt * 20 *2 / 1e9, fill = 
   ylab("Distance traveled (10E9 km)") + 
   labs(fill = "Mode", color = "Mode") + theme_bw() + theme(axis.text.x = element_text(angle = 90))
 
-ggsave("C:/projects/Papers/2020_cities/figs/VKT.pdf", width = 15, units = "cm", height = 10, scale = 1.5)
+#ggsave("C:/projects/Papers/2020_cities/figs/VKT.pdf", width = 15, units = "cm", height = 10, scale = 1.5)
 
 
 modeChoice$scenario = factor(modeChoice$scenario, levels = scenarios)

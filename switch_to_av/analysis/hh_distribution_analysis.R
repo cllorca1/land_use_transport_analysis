@@ -1,4 +1,4 @@
-pacman::p_load(readr, dplyr, data.table, ggplot2, tidyr, rhdf5, sf, tmap)
+pacman::p_load(readr, dplyr, data.table, ggplot2, tidyr, rhdf5, sf, tmap, plotly)
 
 
 upper_folder = "c:/models/silo/muc/scenOutput/"
@@ -8,7 +8,7 @@ upper_folder = "c:/models/silo/muc/scenOutput/"
 
 years = c(2011, 2020, 2030, 2040, 2050)
 
-scenarios = c("A", "B", "C", "D", "E", "0")
+scenarios = c("0_no_parking", "E_no_parking", "D_no_parking", "C_no_parking", "B_no_parking", "A_no_parking")
 
 modeChoice = data.frame()
 
@@ -47,7 +47,11 @@ summary_hhs$typejob = factor(x = summary_hhs$typejob, levels = c(10,20,30,40), l
 
 
 summary_hhs$scenario = factor(summary_hhs$scenario, levels = scenarios)
-scenario_colors = c("#FF0000", "#DE5959", "#D98282", "#C99797", "#C7B3B3","#000000")
+
+
+scenario_colors = c("#000000","#DE5959","#D98282","#C99797", "#C7B3B3","#FF0000")
+
+#scenario_colors = c("#FF0000", "#DE5959", "#D98282", "#C99797", "#C7B3B3","#000000")
 
 ggplot(summary_hhs, aes(x=year, y=workers*20/1000, color = scenario)) +
   geom_line(size  =1) +
@@ -56,6 +60,8 @@ ggplot(summary_hhs, aes(x=year, y=workers*20/1000, color = scenario)) +
   theme_bw() + 
   theme(axis.text.x = element_text(angle = 90)) + 
   xlab("Year") + ylab("Number of workers (thousands)") + labs(color = "Scenario") 
+
+ggplotly()
 
 #ggsave("C:/projects/Papers/2020_cities/figs/workers_from_to_type.pdf", width = 15, units = "cm", height = 10, scale = 1.5)
 

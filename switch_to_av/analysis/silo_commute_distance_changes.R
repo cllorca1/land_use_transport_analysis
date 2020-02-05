@@ -7,7 +7,7 @@ years = c(2011, 2020, 2030, 2040, 2050)
 commuteDistance = data.frame()
 satisfaction = data.frame()
 
-scenarios = c("A", "B", "C", "D", "E", "0")
+scenarios = c("A_no_parking", "B_no_parking", "C_no_parking", "D_no_parking", "E_no_parking", "0_no_parking")
 
 
 for (scenario in scenarios){
