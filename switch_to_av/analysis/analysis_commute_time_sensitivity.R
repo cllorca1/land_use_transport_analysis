@@ -9,7 +9,7 @@ years = c(2011, 2020, 2030, 2040, 2050)
 
 summary = data.frame()
 
-scenarios = c("0_t", "0", "A", "A_t", "C", "C_t")
+scenarios = c("0_none", "A_none")
 
 for (scenario in scenarios){
 
@@ -42,8 +42,10 @@ summary$hh_without_cars = summary$hh_with_workers - summary$hh_with_avs - summar
 summary2 = summary %>% gather(c(hh_with_avs, hh_with_cvs, hh_without_cars), key  ="variable", value = "value")
 
 ggplot(summary2, aes(x= year, y = value, color = variable)) + geom_line(size =1) + geom_point(size = 2) + facet_wrap(.~scenario)
+
+
 ggplot(summary2 %>% filter(variable != "hh_with_workers", variable != "workers"), 
-       aes(x= year, y = value, fill = variable)) + geom_bar(stat = "identity", position = "fill") + facet_wrap(.~scenario)
+       aes(x= year, y = value, fill = variable)) + geom_area(stat = "identity", position = "fill") + facet_wrap(.~scenario)
 
 
 summary2_only_av = summary2 %>% filter(variable == "hh_with_avs")

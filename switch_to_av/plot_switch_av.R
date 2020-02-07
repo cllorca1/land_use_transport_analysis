@@ -1,8 +1,8 @@
 
 years = 2011:2050
 
-initialYears = c(2025, 2030, 2035, 2040, 2045, 2050)
-scenarios = c("A", "B", "C", "D", "E", "0")
+initialYears = c(2025, 2050)
+scenarios = c("With AV", "Without AV")
 time_to_equal_price = 15
 
 df = data.frame()
@@ -28,7 +28,7 @@ for (i in 1:length(scenarios)){
 }
 
 df$scenario = factor(df$scenario, levels = scenarios)
-scenario_colors = c("#FF0000", "#DE5959", "#D98282", "#C99797", "#C7B3B3","#000000")
+scenario_colors = c("#FF0000","#000000")
 
 ggplot(df, aes(x= year, y = ratio, color = scenario)) + geom_line(size = 2) + ylim(0,10) + 
   ylab("Ratio between AV and CV purchase costs") + xlab("Year") + theme_bw() + labs(color = "Scenario") + scale_color_manual(values = scenario_colors)

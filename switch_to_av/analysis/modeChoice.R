@@ -5,16 +5,19 @@ upper_folder = "c:/models/silo/muc/scenOutput/"
 
 years = c(2011, 2020, 2030, 2040, 2050)
 
-scenarios = c("0_no_parking", "E_no_parking", "D_no_parking", "C_no_parking", "B_no_parking", "A_no_parking")
+scenarios = c("0_none", "A_none", "A_vot","A_parking_2", "A_only_transport")
+scenario_labels = c("no-AV", "AV", "AV+VOT", "AV+Parking", "AV+Transport congestion")
 
 ##read silo results
 
 modeChoice = data.frame()
 
-for (scenario in scenarios){
+for (i in 1:length(scenarios)){
+  scenario_label = scenario_labels[i]
+  scenario = scenarios[i]
   scenario_name = paste("AV", scenario, sep = "")
   this_modeChoice = read_csv(paste(upper_folder, scenario_name, "/siloResults/modeChoiceMicroData.csv", sep  = ""))
-  this_modeChoice$scenario = scenario
+  this_modeChoice$scenario = scenario_label
   modeChoice = modeChoice %>% bind_rows(this_modeChoice)
   rm(this_modeChoice)
   
@@ -24,13 +27,17 @@ for (scenario in scenarios){
 
 modeChoice$zeroAutoHh = if_else(modeChoice$autos == 0, "zero-autos", if_else(modeChoice$avs == 0 ,  "hh-with-cvs", "hh-with-avs"))
 
-color_modes = c("indianRed1", "indianRed4", "royalblue3")
+color_modes = c("#d43838", "#6f6f6f","#2563a9")
 
 
-modeChoice$scenario = factor(modeChoice$scenario, levels = scenarios)
+modeChoice_summary = modeChoice %>% group_by(scenario, year, mode) %>% summarize(trips = n())
 
-ggplot(modeChoice, aes(x=year, fill = mode, color = mode)) + geom_bar(stat = "count", position = "fill") +
-  scale_fill_manual(values= color_modes) + scale_color_manual(values= color_modes) + facet_wrap(.~scenario) + 
+modeChoice_summary$mode = factor(modeChoice_summary$mode, levels = c("av", "car", "pt"), labels = c("AV", "CV", "PT"))
+
+modeChoice_summary$scenario = factor(modeChoice_summary$scenario, levels = scenario_labels)
+
+ggplot(modeChoice_summary, aes(x=year, fill = mode, y = trips,  color = as.factor(mode))) + geom_bar(stat = "identity", position = "fill", size = 2) +
+  scale_fill_manual(values= color_modes) + scale_color_manual(values= color_modes) + facet_wrap(.~scenario, ncol = 5) + 
   xlab("Year") + ylab("Share") + labs(fill = "Mode", color = "Mode") + 
   theme_bw() + theme(axis.text.x = element_text(angle = 90))
 
@@ -79,8 +86,11 @@ modeChoice = modeChoice %>% rowwise() %>% mutate(distance = matrix[homeZone, wor
 
 vkt = modeChoice %>% group_by(scenario, year, mode) %>% summarize(n = n(), vkt = sum(distance), avg_distance = mean(distance))
 
+vkt$scenario = factor(vkt$scenario, levels = scenario_labels)
+vkt$mode = factor(vkt$mode, levels = c("av", "car", "pt"), labels = c("AV", "CV", "PT"))
 
-ggplot(vkt %>% filter(mode != "pt"), aes(x = year, y= vkt * 20 *2 / 1e9, fill = mode, color = mode)) + geom_bar(stat = "identity") + facet_wrap(.~scenario) +
+ggplot(vkt %>% filter(mode != "PT"), aes(x = year, y= vkt * 20 *2 / 1e9, fill = mode, color = mode)) + geom_bar(stat = "identity") + 
+  facet_wrap(.~scenario, ncol = 5) +
   scale_fill_manual(values = color_modes) + scale_color_manual(values = color_modes) + xlab("Year") +
   ylab("Distance traveled (10E9 km)") + 
   labs(fill = "Mode", color = "Mode") + theme_bw() + theme(axis.text.x = element_text(angle = 90))
