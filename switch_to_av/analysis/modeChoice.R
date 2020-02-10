@@ -5,8 +5,8 @@ upper_folder = "c:/models/silo/muc/scenOutput/"
 
 years = c(2011, 2020, 2030, 2040, 2050)
 
-scenarios = c("0_none", "A_none", "A_vot","A_parking_2", "A_only_transport")
-scenario_labels = c("no-AV", "AV", "AV+VOT", "AV+Parking", "AV+Transport congestion")
+scenarios = c("0_none", "A_none", "A_vot","A_parking_2", "A_only_transport", "A_all")
+scenario_labels = c("no-AV", "AV", "AV+VOT", "AV+Parking", "AV+Transport congestion", "AV-all")
 
 ##read silo results
 
@@ -37,12 +37,20 @@ modeChoice_summary$mode = factor(modeChoice_summary$mode, levels = c("av", "car"
 modeChoice_summary$scenario = factor(modeChoice_summary$scenario, levels = scenario_labels)
 
 ggplot(modeChoice_summary, aes(x=year, fill = mode, y = trips,  color = as.factor(mode))) + geom_bar(stat = "identity", position = "fill", size = 2) +
-  scale_fill_manual(values= color_modes) + scale_color_manual(values= color_modes) + facet_wrap(.~scenario, ncol = 5) + 
+  scale_fill_manual(values= color_modes) + 
+  scale_color_manual(values= color_modes) + facet_wrap(.~scenario, ncol = 3) + 
   xlab("Year") + ylab("Share") + labs(fill = "Mode", color = "Mode") + 
   theme_bw() + theme(axis.text.x = element_text(angle = 90))
 
 
-#ggsave("C:/projects/Papers/2020_cities/figs/modal_share_relocation.pdf", width = 15, units = "cm", height = 10, scale = 1.5)
+ggplot(modeChoice_summary %>% filter(scenario %in% c("no-AV", "AV")), aes(x=year, fill = mode, y = trips,  color = as.factor(mode))) + geom_bar(stat = "identity", position = "fill", size = 2) +
+  scale_fill_manual(values= color_modes) + 
+  scale_color_manual(values= color_modes) + facet_wrap(.~scenario, ncol = 3) + 
+  xlab("Year") + ylab("Share") + labs(fill = "Mode", color = "Mode") + 
+  theme_bw() + theme(axis.text.x = element_text(angle = 90), legend.position = "bottom") 
+
+
+ggsave("C:/projects/Papers/2020_cities/figs/modal_share_relocation_2.pdf", width = 10, units = "cm", height = 7, scale = 1.5)
 
 
 # modeChoice_scA = modeChoice %>% filter(scenario == "A")
@@ -90,91 +98,92 @@ vkt$scenario = factor(vkt$scenario, levels = scenario_labels)
 vkt$mode = factor(vkt$mode, levels = c("av", "car", "pt"), labels = c("AV", "CV", "PT"))
 
 ggplot(vkt %>% filter(mode != "PT"), aes(x = year, y= vkt * 20 *2 / 1e9, fill = mode, color = mode)) + geom_bar(stat = "identity") + 
-  facet_wrap(.~scenario, ncol = 5) +
+  facet_wrap(.~scenario, ncol = 3) +
   scale_fill_manual(values = color_modes) + scale_color_manual(values = color_modes) + xlab("Year") +
   ylab("Distance traveled (10E9 km)") + 
-  labs(fill = "Mode", color = "Mode") + theme_bw() + theme(axis.text.x = element_text(angle = 90))
+  labs(fill = "Mode", color = "Mode") + theme_bw() +
+  theme(axis.text.x = element_text(angle = 90), legend.position = "bottom")
 
-#ggsave("C:/projects/Papers/2020_cities/figs/VKT.pdf", width = 15, units = "cm", height = 10, scale = 1.5)
+ggsave("C:/projects/Papers/2020_cities/figs/VKT.pdf", width = 15, units = "cm", height = 10, scale = 1.3)
 
-
-modeChoice$scenario = factor(modeChoice$scenario, levels = scenarios)
-
-scenario_colors = c("#000000", "#FF0000", "#DE5959", "#D98282", "#C99797", "#C7B3B3")
-
-ggplot(modeChoice %>% filter(year == 2049), aes(x=distance, color = scenario)) + stat_ecdf(size = 1) + scale_color_manual(values = scenario_colors)
-
-
-zones = st_read("c:/models/silo/muc/input/zonesShapefile/zones.shp")
-
-modeChoiceAtJob  =modeChoice %>% group_by(year, workZone, mode) %>% summarize(count = n()) %>% spread(mode, count, fill = 0)
-modeChoiceAtJob$total = modeChoiceAtJob$av + modeChoiceAtJob$car + modeChoiceAtJob$pt
-modeChoiceAtJob$shareAv = modeChoiceAtJob$av / modeChoiceAtJob$total
-modeChoiceAtJob$sharePt = modeChoiceAtJob$pt / modeChoiceAtJob$total
-modeChoiceAtJob$shareCv = modeChoiceAtJob$car / modeChoiceAtJob$total
-
-zones = zones %>% left_join(modeChoiceAtJob %>% filter(year == 2011), by = c("id" = "workZone"))
-zones [is.na(zones)] = 0 #fills zones without observation of mode choice
-
-regions = zones %>% group_by(AGS) %>% summarize(shareAv = weighted.mean(shareAv, total), 
-                                                shareCv = weighted.mean(shareCv, total),
-                                                sharePt = weighted.mean(sharePt, total))
-
-p  = tm_basemap(leaflet::providers$CartoDB) +
-  tm_shape(regions, name = "Av") +  tm_polygons(col = "shareAv") + 
-  tm_shape(regions, name = "Pt")  + tm_polygons(col = "sharePt") + 
-  tm_shape(regions, name = "Cv") + tm_polygons(col = "shareCv")
-
-tmap_leaflet(p)
-
-
-zoneTypes = read_csv("c:/models/silo/muc/input/zoneSystem.csv")
-
-zoneTypes = zoneTypes %>% select(id = Zone, area = Area, type = BBSR_Type)
-
-shareByJobZoneType = zoneTypes %>% left_join(modeChoiceAtJob , by = c("id" = "workZone"))
-shareByJobZoneType [is.na(shareByJobZoneType)] = 0
-
-shareByJobZoneType = shareByJobZoneType %>% group_by(type, year) %>% summarize(shareAv = weighted.mean(shareAv, total), 
-                                                         shareCv = weighted.mean(shareCv, total),
-                                                         sharePt = weighted.mean(sharePt, total))
-
-shareByJobZoneType = shareByJobZoneType %>% gather(3:5, key = "mode", value = "share")
-
-shareByJobZoneType$typeWord = factor(x = shareByJobZoneType$type, levels = c(10,20,30,40), labels = c("Core", "Medium city", "Town", "Rural"))
-
-ggplot(shareByJobZoneType %>% filter(year %in% selected_years), aes(x = typeWord, fill = mode, y = share)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(.~year)
-
-
-modeChoiceAtHome  =modeChoice %>% group_by(year, homeZone, mode) %>% summarize(count = n()) %>% spread(mode, count, fill = 0)
-modeChoiceAtHome$total = modeChoiceAtHome$av + modeChoiceAtHome$car + modeChoiceAtHome$pt
-modeChoiceAtHome$shareAv = modeChoiceAtHome$av / modeChoiceAtHome$total
-modeChoiceAtHome$sharePt = modeChoiceAtHome$pt / modeChoiceAtHome$total
-modeChoiceAtHome$shareCv = modeChoiceAtHome$car / modeChoiceAtHome$total
-
-
-shareByHomeZoneType = zoneTypes %>% left_join(modeChoiceAtHome , by = c("id" = "homeZone"))
-shareByHomeZoneType [is.na(shareByHomeZoneType)] = 0
-
-shareByHomeZoneType = shareByHomeZoneType %>% group_by(type, year) %>% summarize(shareAv = weighted.mean(shareAv, total), 
-                                                                               shareCv = weighted.mean(shareCv, total),
-                                                                               sharePt = weighted.mean(sharePt, total))
-
-shareByHomeZoneType = shareByHomeZoneType %>% gather(3:5, key = "mode", value = "share")
-
-shareByHomeZoneType$typeWord = factor(x = shareByHomeZoneType$type, levels = c(10,20,30,40), labels = c("Core", "Medium city", "Town", "Rural"))
-
-ggplot(shareByHomeZoneType %>% filter(year %in% selected_years), aes(x = typeWord, fill = mode, y = share)) +
-  geom_bar(stat = "identity") +
-  facet_wrap(.~year)
-
-
-modeChoiceByParkingQuality = modeChoice %>% group_by(year, parkingAtHome, parkingAtWork, mode) %>%
-  summarize(count = n()) 
-
-
-
-ggplot(modeChoiceByParkingQuality %>% filter(year %in% selected_years), aes(x=as.factor(parkingAtWork), y = count, fill = mode)) +
-  geom_bar(stat = "identity", position = "fill") + facet_grid(parkingAtHome~year)
+# 
+# modeChoice$scenario = factor(modeChoice$scenario, levels = scenarios)
+# 
+# scenario_colors = c("#000000", "#FF0000", "#DE5959", "#D98282", "#C99797", "#C7B3B3")
+# 
+# ggplot(modeChoice %>% filter(year == 2049), aes(x=distance, color = scenario)) + stat_ecdf(size = 1) + scale_color_manual(values = scenario_colors)
+# 
+# 
+# zones = st_read("c:/models/silo/muc/input/zonesShapefile/zones.shp")
+# 
+# modeChoiceAtJob  =modeChoice %>% group_by(year, workZone, mode) %>% summarize(count = n()) %>% spread(mode, count, fill = 0)
+# modeChoiceAtJob$total = modeChoiceAtJob$av + modeChoiceAtJob$car + modeChoiceAtJob$pt
+# modeChoiceAtJob$shareAv = modeChoiceAtJob$av / modeChoiceAtJob$total
+# modeChoiceAtJob$sharePt = modeChoiceAtJob$pt / modeChoiceAtJob$total
+# modeChoiceAtJob$shareCv = modeChoiceAtJob$car / modeChoiceAtJob$total
+# 
+# zones = zones %>% left_join(modeChoiceAtJob %>% filter(year == 2011), by = c("id" = "workZone"))
+# zones [is.na(zones)] = 0 #fills zones without observation of mode choice
+# 
+# regions = zones %>% group_by(AGS) %>% summarize(shareAv = weighted.mean(shareAv, total), 
+#                                                 shareCv = weighted.mean(shareCv, total),
+#                                                 sharePt = weighted.mean(sharePt, total))
+# 
+# p  = tm_basemap(leaflet::providers$CartoDB) +
+#   tm_shape(regions, name = "Av") +  tm_polygons(col = "shareAv") + 
+#   tm_shape(regions, name = "Pt")  + tm_polygons(col = "sharePt") + 
+#   tm_shape(regions, name = "Cv") + tm_polygons(col = "shareCv")
+# 
+# tmap_leaflet(p)
+# 
+# 
+# zoneTypes = read_csv("c:/models/silo/muc/input/zoneSystem.csv")
+# 
+# zoneTypes = zoneTypes %>% select(id = Zone, area = Area, type = BBSR_Type)
+# 
+# shareByJobZoneType = zoneTypes %>% left_join(modeChoiceAtJob , by = c("id" = "workZone"))
+# shareByJobZoneType [is.na(shareByJobZoneType)] = 0
+# 
+# shareByJobZoneType = shareByJobZoneType %>% group_by(type, year) %>% summarize(shareAv = weighted.mean(shareAv, total), 
+#                                                          shareCv = weighted.mean(shareCv, total),
+#                                                          sharePt = weighted.mean(sharePt, total))
+# 
+# shareByJobZoneType = shareByJobZoneType %>% gather(3:5, key = "mode", value = "share")
+# 
+# shareByJobZoneType$typeWord = factor(x = shareByJobZoneType$type, levels = c(10,20,30,40), labels = c("Core", "Medium city", "Town", "Rural"))
+# 
+# ggplot(shareByJobZoneType %>% filter(year %in% selected_years), aes(x = typeWord, fill = mode, y = share)) +
+#   geom_bar(stat = "identity") +
+#   facet_wrap(.~year)
+# 
+# 
+# modeChoiceAtHome  =modeChoice %>% group_by(year, homeZone, mode) %>% summarize(count = n()) %>% spread(mode, count, fill = 0)
+# modeChoiceAtHome$total = modeChoiceAtHome$av + modeChoiceAtHome$car + modeChoiceAtHome$pt
+# modeChoiceAtHome$shareAv = modeChoiceAtHome$av / modeChoiceAtHome$total
+# modeChoiceAtHome$sharePt = modeChoiceAtHome$pt / modeChoiceAtHome$total
+# modeChoiceAtHome$shareCv = modeChoiceAtHome$car / modeChoiceAtHome$total
+# 
+# 
+# shareByHomeZoneType = zoneTypes %>% left_join(modeChoiceAtHome , by = c("id" = "homeZone"))
+# shareByHomeZoneType [is.na(shareByHomeZoneType)] = 0
+# 
+# shareByHomeZoneType = shareByHomeZoneType %>% group_by(type, year) %>% summarize(shareAv = weighted.mean(shareAv, total), 
+#                                                                                shareCv = weighted.mean(shareCv, total),
+#                                                                                sharePt = weighted.mean(sharePt, total))
+# 
+# shareByHomeZoneType = shareByHomeZoneType %>% gather(3:5, key = "mode", value = "share")
+# 
+# shareByHomeZoneType$typeWord = factor(x = shareByHomeZoneType$type, levels = c(10,20,30,40), labels = c("Core", "Medium city", "Town", "Rural"))
+# 
+# ggplot(shareByHomeZoneType %>% filter(year %in% selected_years), aes(x = typeWord, fill = mode, y = share)) +
+#   geom_bar(stat = "identity") +
+#   facet_wrap(.~year)
+# 
+# 
+# modeChoiceByParkingQuality = modeChoice %>% group_by(year, parkingAtHome, parkingAtWork, mode) %>%
+#   summarize(count = n()) 
+# 
+# 
+# 
+# ggplot(modeChoiceByParkingQuality %>% filter(year %in% selected_years), aes(x=as.factor(parkingAtWork), y = count, fill = mode)) +
+#   geom_bar(stat = "identity", position = "fill") + facet_grid(parkingAtHome~year)

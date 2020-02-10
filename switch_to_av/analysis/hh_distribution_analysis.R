@@ -29,6 +29,11 @@ scenarios = c("0_only_transport", "A_only_transport")
 scenario_labels = c( "no-AV", "AV")
 scenario_colors = c("#000000", "#FF0000")
 
+scenarios = c("0_all", "A_all")
+scenario_labels = c( "no-AV", "AV")
+scenario_colors = c("#000000", "#FF0000")
+
+
 
 modeChoice = data.frame()
 

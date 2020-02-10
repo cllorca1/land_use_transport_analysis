@@ -8,10 +8,22 @@ commuteDistance = data.frame()
 satisfaction = data.frame()
 
 
-scenarios = c("0_none", "A_none", "0_vot", "A_vot","0_parking_2","A_parking_2", "0_only_transport", "A_only_transport")
-scenario_labels = c("no-AV", "AV", "no-AV", "AV", "no-AV", "AV", "no-AV", "AV")
+scenarios = c("0_none", "A_none", 
+              "0_vot", "A_vot",
+              "0_parking_2","A_parking_2",
+              "0_only_transport", "A_only_transport",
+              "0_all", "A_all")
+scenario_labels = c("no-AV", "AV",
+                    "no-AV", "AV",
+                    "no-AV", "AV",
+                    "no-AV", "AV",
+                    "no-AV", "AV")
 
-cases = c("base", "base", "+VOT" ,"+VOT", "+Parking", "+Parking", "+Transport congestion", "+Transport congestion")
+cases = c("AV", "AV",
+          "AV+VOT" ,"AV+VOT",
+          "AV+Parking", "AV+Parking",
+          "AV+Transport congestion", "AV+Transport congestion",
+          "AV-All", "AV-All")
 
 
 
@@ -43,16 +55,16 @@ for (i in 1:length(scenarios)){
 
 commuteDistance = commuteDistance %>% group_by(scenario, year, case) %>% summarize(time = weighted.mean(time, hh, na.rm = T))
 scenario_colors = c("#FF0000", "#000000")
-commuteDistance$case = factor(commuteDistance$case,  c("base", "+VOT", "+Parking", "+Transport congestion"))
+commuteDistance$case = factor(commuteDistance$case,  c("AV", "AV+VOT", "AV+Parking", "AV+Transport congestion", "AV-All"))
 
 ggplot(commuteDistance, aes(x=year, y= time, color = scenario)) +
   geom_line(size = 2)  + scale_color_manual(values= scenario_colors) + theme_bw() +
   xlab("Year") + ylab("Average commute time (measured as time by car) (min)") + labs(color = "Scenario") +
-    facet_wrap(.~case, ncol = 4) + 
+    facet_wrap(.~case, ncol = 3) + 
   theme(legend.position = "bottom") + 
   theme(axis.text.x = element_text(angle = 90))
 
-#ggsave("C:/projects/Papers/2020_cities/figs/commuteTime.pdf", width = 15, units = "cm", height = 10, scale = 1.5)
+ggsave("C:/projects/Papers/2020_cities/figs/commuteTime.pdf", width = 15, units = "cm", height = 10, scale = 1.3)
 
 
 ##add the zone type to the satisfaction data
