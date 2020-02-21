@@ -16,3 +16,4 @@ hh_income = pp %>% group_by(hhid) %>% summarise(income = sum(income))
 hh = hh %>% left_join(hh_income, by=c("id" = "hhid"))
 
 ggplot(hh, aes(x=income, color = has_car)) + stat_ecdf() + xlim(0,120000)
+
