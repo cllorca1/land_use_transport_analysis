@@ -5,8 +5,9 @@ upper_folder = "c:/models/silo/muc/scenOutput/"
 
 years = c(2011, 2020, 2030, 2040, 2050)
 
-scenarios = c("0_none", "A_none", "A_vot","A_parking_2", "A_only_transport", "A_all")
-scenario_labels = c("no-AV", "AV", "AV+VOT", "AV+Parking", "AV+Transport congestion", "AV-all")
+scenarios = c("AV0_parking_2","AVA_parking_2")
+scenario_labels = c("no-AV", "AV")
+
 
 ##read silo results
 
@@ -15,7 +16,7 @@ modeChoice = data.frame()
 for (i in 1:length(scenarios)){
   scenario_label = scenario_labels[i]
   scenario = scenarios[i]
-  scenario_name = paste("AV", scenario, sep = "")
+  scenario_name = paste(scenario, sep = "")
   this_modeChoice = read_csv(paste(upper_folder, scenario_name, "/siloResults/modeChoiceMicroData.csv", sep  = ""))
   this_modeChoice$scenario = scenario_label
   modeChoice = modeChoice %>% bind_rows(this_modeChoice)
