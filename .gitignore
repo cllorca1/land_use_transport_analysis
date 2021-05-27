@@ -1,3 +1,9 @@
+*.png
+modeChoiceSensitivity.csv
+modeChoiceSensitivity_v2.csv
+mito/rsconnect/
+*.html
+
 .Rproj.user
 
 # Windows image file caches
