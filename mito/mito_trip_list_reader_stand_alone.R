@@ -2,7 +2,7 @@ pacman::p_load(readr, dplyr, ggplot2, tidyr)
 
 mito_folder = "c:/models/mito/muc/mitoMunich/"
 
-scenario = "base_2.0"
+scenario = "test"
 
 year = 2011
 

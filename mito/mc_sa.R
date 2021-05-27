@@ -1,6 +1,6 @@
 pacman::p_load(readr, dplyr, data.table, ggplot2, tidyr, rhdf5, sf, tmap, plotly)
 
-results = read_csv("C:/code/mito/modeChoiceSensitivity.csv") %>% select(-privateAV, -sharedAV, -pooledTaxi)
+results = read_csv("mito/modeChoiceSensitivity_v2.csv") %>% select(-privateAV, -sharedAV, -pooledTaxi, -taxi)
 
 results_long = results %>% pivot_longer(cols = c(autoDriver,autoPassenger,bicycle,bus,train,tramOrMetro,walk), names_to  = "mode", values_to = "p")
 
@@ -41,7 +41,7 @@ for (distance in this_distances){
 }
 
 
-ggsave(plot = p, filename = "c:/projects/mito/mc_sa/base_share.png",
+ggsave(plot = p, filename = "c:/projects/mito/mc_sa/base_share_v2.png",
        device = png(), scale = 3, width = 15, height = 6, units = "cm")
 
 

@@ -1,4 +1,18 @@
-pacman::p_load(data.table, dplyr, ggplot2, readr, tidyr, reshape, shiny, shinydashboard, plotly, processx, leaflet, sf, tmap, rgdal, shinyWidgets)
+library(data.table)
+library(dplyr)
+library(ggplot2)
+library(readr)
+library(tidyr) 
+library(reshape)
+library(shiny)
+library(shinydashboard)
+library(plotly)
+library(processx)
+library(leaflet)
+library(sf)
+library(tmap)
+library(rgdal)
+library(here)
 
 mode_order = c("autoDriver","autoPassenger","train","tramOrMetro","bus", "bicycle", "walk")
 mode_colors = c("autoDriver" = "#878787",
@@ -54,6 +68,10 @@ ui = dashboardPage(
       tabPanel(
         title = "Comparison modal share",
         plotlyOutput("comparison", width = "100%")
+      ),
+      tabPanel(
+        title = "Modal share by distance",
+        plotlyOutput("byDist", width = "100%")
       )
     )
   )
@@ -64,7 +82,7 @@ server = function(input, output){
   
   
   results_long = eventReactive(input$update, {
-    results = read_csv("C:/code/mito/modeChoiceSensitivity.csv") %>% select(-privateAV, -sharedAV, -pooledTaxi)
+    results = read_csv("modeChoiceSensitivity.csv") %>% select(-privateAV, -sharedAV, -pooledTaxi)
     
     results_long = results %>% pivot_longer(cols = c(autoDriver,autoPassenger,bicycle,bus,train,tramOrMetro,walk), names_to  = "mode", values_to = "p")
     
@@ -77,6 +95,7 @@ server = function(input, output){
     results_long$factorPtPrice = round(results_long$factorPtPrice, 1)
     
     results_long$mode = factor(results_long$mode, levels = mode_order)
+    results_long$income = factor(results_long$income, levels = c(2000,10000), labels = c("low income", "high income"))
     results_long
     
   })
@@ -103,6 +122,28 @@ server = function(input, output){
     this_results_long_subset = this_results_long_subset %>% bind_rows(this_results_long_reference)
     
     p = ggplot(this_results_long_subset, aes(x = case, y = as.numeric(p), fill = mode, color = mode)) +
+      geom_bar(stat  ="identity") +
+      scale_fill_manual(values = mode_colors) + scale_color_manual(values = mode_colors) +
+      facet_grid(income~as.factor(purpose)) +
+      ylab("Modal share") + xlab("Travel time factor (x CAR time)") + 
+      theme(axis.text.x = element_text(angle = 90))
+    
+    ggplotly(p, height = 800, width = 1800)
+    
+    
+  })
+  
+  output$byDist = renderPlotly({
+    
+  
+    this_results_long_subset = results_long() %>% filter(factorPt == input$factorPt,
+                                                         factorPtPrice == input$factorPtCost,
+                                                         factorCarPrice == input$factorCarCost,
+                                                         factorCar == input$factorCar) 
+    
+    
+    
+    p = ggplot(this_results_long_subset, aes(x = distance, y = as.numeric(p), fill = mode, color = mode)) +
       geom_bar(stat  ="identity") +
       scale_fill_manual(values = mode_colors) + scale_color_manual(values = mode_colors) +
       facet_grid(income~as.factor(purpose)) +

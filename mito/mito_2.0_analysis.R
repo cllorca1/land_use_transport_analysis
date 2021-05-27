@@ -4,20 +4,23 @@ mito_folder = "c:/models/mito/muc/mitoMunich/"
 
 scenarios = c("base_1_0_v2",
               #"telework_1_0_v2",
-              "base_2.1_calibrated"#, 
+              "base_2.1_calibrated",
+              "base_2.0_v3"
+              #, 
               #"telework_2_1"
               )
 scenario_names = c("base 1.0",
                    #"telework",
-                   "base 2.0"#,
+                   "base 2.0",
                    #"telework"
+                   "base 2.0 v2"
                    )
 
 #scenarios = c("base_1_0_v2","supercongestion_1_0_v2", "base_2.1_calibrated", "supercongestion_2_1")
 # scenario_names = c("base","congestion", "base", "congestion")
 purposes_ordered = c("HBW", "HBE", "HBO", "HBS", "NHBW", "NHBO")
 
-versions = c(1,1,2,2)
+versions = c(1,2,2)
 
 classification = data.frame(scenario = scenarios, scen_name = scenario_names, version = versions)
 
@@ -68,9 +71,6 @@ summary = trips %>% group_by(purpose, scenario, is_worker) %>%
 summary$purpose = factor(summary$purpose, levels = purposes_ordered)
 
 
-
-
-
 summary = summary %>% left_join(classification)
 summary$scenario = factor(summary$scenario, levels = scenarios)
 
@@ -111,7 +111,7 @@ ggplot(summary, aes(group = scenario, x= purpose, fill = scenario, y = sum_time)
   facet_grid(is_worker~.)
 
 
-##difference-only
+##difference-only################
 
 reference_scenarios = summary %>% filter(scen_name == "base")
 
@@ -157,7 +157,7 @@ ggplot(summary_differences, aes(group = scenario, x= purpose, fill = as.factor(v
   geom_hline(yintercept = 0)
 
 
-#### modal share
+#### modal share###############
 summary_by_mode = trips %>% group_by(scenario, mode, purpose) %>%
   summarize(count = n(),
             distance_mean = mean(distance, na.rm = T),

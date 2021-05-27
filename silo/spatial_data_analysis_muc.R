@@ -3,9 +3,18 @@ pacman::p_load(data.table, dplyr, ggplot2, tidyr, readr, plotly, sf, tmap, rgeos
 
 silo_folder = "C:/models/silo/muc/"
 
-scenarios = c("base_5", "AV0_parking_2","AVA_parking_2")
-scenario_names = c("base", "no-AV", "AV")
-scales = c(0.05, 0.05,0.05)
+scenarios = c("base_5" 
+              #,"AV0_parking_2",
+              #"AVA_parking_2"
+              )
+scenario_names = c("base"
+                   #,"no-AV",
+                   #"AV"
+                   )
+scales = c(0.05
+           #,0.05,
+           #0.05
+           )
 
 
 my_scale_linetype = c("dashed", "solid")
@@ -304,8 +313,8 @@ ggplot(modal_share_by_group %>% filter(name %in% c("car", "pt", "other", "no_tra
 
 
 ggplot(modal_share_by_group %>%
-         filter(name %in% c("car_time", "pt_time", "other_time")), aes(x=year, y = value, color = scenario_name, linetype = as.factor(scale))) +
-  geom_line(stat = "identity", size = 1) + facet_grid(name~density_bin) + 
+         filter(name %in% c("car_time", "pt_time", "other_time")), aes(x=year, y = value, color = name, linetype = as.factor(scale))) +
+  geom_line(stat = "identity", size = 1) + facet_grid(scenario_name~density_bin) + 
  theme_bw() + 
   xlab("Year") + ylab("Average travel time by mode (min)")
 

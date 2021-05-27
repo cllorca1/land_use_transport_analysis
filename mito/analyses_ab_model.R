@@ -2,7 +2,7 @@ pacman::p_load(readr, dplyr, ggplot2, tidyr)
 
 mito_folder = "c:/models/mito/muc/mitoMunich/"
 
-scenario = "base_2.0"
+scenario = "new_tod_20210421_test"
 
 year = 2011
 
@@ -11,7 +11,7 @@ trip_filename = paste(mito_folder, "scenOutput/", scenario , "/", year, "/microD
 trips = read_csv(trip_filename)
 
 speed_walk = 5
-speed_bike = 12
+speed_bike = 13
 
 trips = trips %>%
   mutate(time = if_else(mode == "autoDriver" | mode == "autoPassenger", time_auto, 
@@ -30,6 +30,12 @@ trip_times = trips %>% select(id, purpose, person, departure_time, departure_tim
 trip_times = trip_times %>% 
   mutate(end_time = if_else(!is.na(departure_time_return) ,departure_time_return + time, departure_time + time))
 
+
+# 
+# 
+# trip_times = trip_times %>% group_by(person) %>% mutate(n = n())
+# 
+# trip_times_multiple = trip_times %>% filter(n > 2)
 
 sample_person = sample(trip_times$person, size = 50000)
 trip_times_copy = trip_times %>% filter(person  %in% sample_person)
